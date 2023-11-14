@@ -5,7 +5,11 @@ from var import *
 
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self, x: int, y: int, direction: int, speed: int) -> None:
+    def __init__(self,
+                 x: int, y: int, direction: int, speed: int,
+                 ir: tuple[int, int, int] = (255, 255, 255),
+                 cr: tuple[int, int, int] = (000, 000, 000),
+                 lr: tuple[int, int, int]=(000, 255, 000)) -> None:
         super().__init__()
 
         self.direction = direction
@@ -19,9 +23,9 @@ class Bullet(pg.sprite.Sprite):
             80, 80
         )
 
-        pg.draw.circle(self.image, (000, 255, 000), (40, 40), self.radius + 2)
-        pg.draw.circle(self.image, (000, 000, 000), (40, 40), self.radius + 1)
-        pg.draw.circle(self.image, (255, 255, 255), (40, 40), self.radius)
+        pg.draw.circle(self.image, lr, (40, 40), self.radius + 2)
+        pg.draw.circle(self.image, cr, (40, 40), self.radius + 1)
+        pg.draw.circle(self.image, ir, (40, 40), self.radius)
 
     def update(self) -> None:
         self.x += degrees(sin(self.direction)) * self.speed

@@ -4,11 +4,10 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 from pygame.locals import *
 import pygame as pg
-import random
 
 from effectmanager import EffectManager
+from stagemanager import StageManager
 from player import Player
-from bullet import Bullet
 from var import *
 
 pg.init()
@@ -19,16 +18,13 @@ pg.display.set_caption("danmaku?")
 
 game_over = False
 running = True
-bullets = pg.sprite.Group(
-    [
-        Bullet((PF_START_X + PF_END_X) // 2, (PF_START_Y + PF_END_Y) // 2, i, 1)
-        for i in range(360)
-    ]
-)
-player = pg.sprite.GroupSingle(Player())
-effects = EffectManager()
 
-font = pg.font.Font("LePatinMagicien-XB7d.ttf")
+bullets = pg.sprite.Group()
+player = pg.sprite.GroupSingle(Player())
+font = pg.font.Font("LePatinMagicien-XB7d.ttf", 20)
+effects = EffectManager()
+stg_man = StageManager()
+stg_man.player = player
 
 window = pg.display.get_surface()
 clock = pg.time.Clock()
@@ -46,28 +42,41 @@ while running:
         if event.type == KEYDOWN:
             player.sprite.send_keydown(event.dict["key"])
 
+        if event.type == KEYDOWN and game_over:
+            if event.dict["key"] == K_z:
+                game_over = False
+                
+                player.sprite.reset()
+                bullets.empty()
+                stg_man.reset()
+
+        if event.type == EVENT_PLAYER_IFRAME:
+            for _ in range(3):
+                effects.add_particle(player.sprite.x, player.sprite.y, min_speed=0.01,  max_speed=0.011,  min_frames=20, max_frames=50)
+
         if event.type == EVENT_PLAYER_HIT:
             for _ in range(10):
                 effects.add_particle(player.sprite.x, player.sprite.y)
 
         if event.type == EVENT_GAME_OVER:
-            for _ in range(10):
-                effects.add_particle(player.sprite.x, player.sprite.y)
-
             game_over = True
 
     window.fill((000, 000, 000))
 
     if game_over:
-        continue
+        text = font.render("Game Over!!!", False, (255, 255, 255))
+        window.blit(text, (200, 200))
+        pg.display.flip()
 
-    bullets.update()
-    player.update()
-    effects.update()
+    if not game_over:
+        stg_man.update(bullets)
+        bullets.update()
+        player.update()
+        effects.update()
 
-    player.draw(window)
-    bullets.draw(window)
-    effects.draw(window)
+        player.draw(window)
+        bullets.draw(window)
+        effects.draw(window)
 
     pg.draw.rect(
         window,
@@ -76,15 +85,18 @@ while running:
         5,
     )
 
-    # collisions
-    collidions = pg.sprite.spritecollide(
-        player.sprite,
-        bullets,
-        False,
-        pg.sprite.collide_circle,
-    )
+    if not game_over:
+        # collisions
+        collisions = pg.sprite.spritecollide(
+            player.sprite,
+            bullets,
+            False,
+            pg.sprite.collide_circle,
+        )
+        player.sprite.register_collision(collisions)
 
-    player.sprite.register_collision(collidions)
+    text = font.render(f"Lives: {player.sprite.lives}", False, (255, 255, 255))
+    window.blit(text, (PF_END_X+25, PF_START_Y))
 
     pg.display.flip()
 

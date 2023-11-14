@@ -53,7 +53,7 @@ class EffectManager:
     def clear(self):
         self.effects.clear()
 
-    def add_particle(self, x: int, y: int):
+    def add_particle(self, x: int, y: int, min_speed: float=0.1,  max_speed: float=0.11, min_frames: int=100,  max_frames: int=200):
         self.effects.append(
-            Effect(x, y, uniform(0.1, 0.11), uniform(0, 360), randrange(100, 200, 10))
+            Effect(x, y, uniform(min_speed, max_speed), uniform(0, 360), randrange(min_frames, max_frames, 10))
         )
