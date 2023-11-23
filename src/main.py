@@ -24,7 +24,9 @@ player = pg.sprite.GroupSingle(Player())
 font = pg.font.Font("LePatinMagicien-XB7d.ttf", 20)
 effects = EffectManager()
 stg_man = StageManager()
+
 stg_man.player = player
+stg_man.font = font
 
 window = pg.display.get_surface()
 clock = pg.time.Clock()

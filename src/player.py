@@ -28,7 +28,7 @@ class Player(pg.sprite.Sprite):
             80, 80
         )
 
-        self.lives = 10
+        self.lives = 2
 
     def send_keyup(self, key):
         if key == K_UP:
@@ -143,4 +143,4 @@ class Player(pg.sprite.Sprite):
         self.x = (PF_START_X + PF_END_X) // 2
         self.y = PF_END_Y - 20
 
-        self.lives = 10
+        self.lives = 2

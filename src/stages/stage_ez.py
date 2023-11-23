@@ -8,9 +8,10 @@ import pygame as pg
 from var import *
 
 
-class StageManager:
+class StageManagerEZ:
     def __init__(self) -> None:
         self.bullets: list[Bullet] = []
+        self.font: pg.font.Font = None
         self.player = None
         self._stg = None
 
@@ -235,14 +236,42 @@ class StageManager:
 
             yield from self.wait(15)
 
-        # scarlet meister!
-        for angle in range(0, 360):
-            ...
+        yield from self.wait(35)
+
+        # death rings
+        for color in ((255, 000, 000), (000, 255, 000), (255, 255, 000), (000, 000, 255), (255, 000, 255), (000, 255, 255), (255, 255, 255)):
+            for angle in range(0, 360, 10):
+                for _ in range(randint(3, 5)):
+                    bullets.add(Bullet(PF_MID_X, PF_START_Y*1.2, uniform(angle-10, angle+10), uniform(5, 5.5), lr=color))
+            
+            yield from self.wait(25)
+
+        # aimed massive random blodge
+        for _ in range(128):
+            direction = -degrees(
+                atan(
+                    radians(
+                        (self.player.sprite.x - xx)
+                        / (PF_START_X - self.player.sprite.y)
+                    )
+                )
+            )
+            bullets.add(Bullet(xx, PF_START_Y, direction+uniform(-1, 1),uniform(2, 4), lr=(255, 255, 000)))
 
         # drop a life
         bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
+        # troll the player
+        for _ in range(100):
+            pg.display.get_surface().blit(self.font.render("You Win!", False, (255, 000, 000)))
+            yield
+
+        for _ in range(100):
+            pg.display.get_surface().blit(self.font.render("LOL! Problem >;)", False, (255, 000, 000)))
+            yield
+
         while True:
+            print("well done")
             yield
 
     def update(self, bullets):
