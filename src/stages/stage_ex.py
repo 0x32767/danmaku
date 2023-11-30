@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from random import randint, uniform, choice
-from math import radians, degrees, atan
+from math import radians, degrees, atan, sin, cos
 from bullet import Bullet
 from heart import Heart
 import pygame as pg
 from var import *
 
 
-class StageManagerEZ:
+class StageManagerEX:
     def __init__(self) -> None:
         self.bullets: list[Bullet] = []
         self.font: pg.font.Font = None
@@ -101,20 +101,69 @@ class StageManagerEZ:
 
         yield from self.wait(50)
 
+        # rings
+        offset = 100
+        for _ in range(5):
+            for _ in range(100):
+                # create a static circle
+                for angle in range(0, 360, 10):
+                    bullets.add(Bullet(
+                        PF_MID_X+(2*degrees(cos(radians(angle+offset)))),
+                        PF_MID_Y+(2*degrees(sin(radians(angle+offset)))),
+                    angle, 0))
+                
+                offset -= uniform(1, 2)
+    
+                if offset < 2:
+                    offset = 100
+                
+                else:
+                    if offset > 25:
+                        yield from self.wait(1)
+    
+                    elif offset > 10:
+                        yield from self.wait(2)
+    
+                    else:
+                        positions = []
+                        # shoot bullets out
+                        for bullet in bullets.sprites():
+                            positions.append((bullet.x, bullet.y, bullet.direction))
+
+                        yield from self.wait(10)
+
+                        for (x, y, heading) in positions:
+                            bullets.add(
+                                Bullet(x, y, heading, speed=0, ir=(255, 000, 000), lr=(255, 255, 255)),
+                                Bullet(x+uniform(-2, 2), y+uniform(-2, 2), heading, speed=0, ir=(255, 000, 000), lr=(255, 255, 255))
+                            )
+
+                        yield from self.wait(20)
+
+                        for bullet in bullets.sprites():
+                            bullet.speed = 0.05+uniform(0, 0.1)
+
+                        while bullets:
+                            yield
+
+                        offset = 100
+    
+                bullets.empty()
+
         # a checkerboard of bullets
         for _ in range(10):
             # X
-            for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 10):
+            for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
                 bullets.add(Bullet(xx, PF_START_Y + 10, radians(0), 1))
 
             # Y
-            for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 10):
+            for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 5):
                 bullets.add(Bullet(PF_START_X + 10, yy, radians(90), 1))
 
             yield from self.wait(75)
 
         # a row of streaming
-        for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 10):
+        for xx in range(PF_START_X, PF_END_X, 5):
             direction = -degrees(
                 atan(
                     radians(
@@ -125,6 +174,7 @@ class StageManagerEZ:
             )
             bullets.add(Bullet(xx, PF_START_Y, direction, 2, lr=(255, 255, 000)))
 
+        # random bulets
         for _ in range(50):
             bullets.add(
                 Bullet(
@@ -139,11 +189,11 @@ class StageManagerEZ:
         # continue checkerboard of bullets
         for _ in range(5):
             # X
-            for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 10):
+            for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
                 bullets.add(Bullet(xx, PF_START_Y + 10, radians(0), 1))
 
             # Y
-            for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 10):
+            for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 5):
                 bullets.add(Bullet(PF_START_X + 10, yy, radians(90), 1))
 
             yield from self.wait(75)
@@ -202,7 +252,7 @@ class StageManagerEZ:
         for speed_up in range(10):
             pos = choice(orientation)
 
-            for angle in range(0, 360, 10):
+            for angle in range(0, 360, 5):
                 bullets.add(
                     Bullet(
                         x=pos[0],
@@ -262,16 +312,15 @@ class StageManagerEZ:
         bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
         # troll the player
-        for _ in range(100):
-            pg.display.get_surface().blit(self.font.render("You Win!", False, (255, 000, 000)))
-            yield
+        #for _ in range(100):
+        #    pg.display.get_surface().blit(self.font.render("You Win!", False, (255, 000, 000)))
+        #    yield
 
-        for _ in range(100):
-            pg.display.get_surface().blit(self.font.render("LOL! Problem >;)", False, (255, 000, 000)))
-            yield
+        #for _ in range(100):
+        #    pg.display.get_surface().blit(self.font.render("LOL! Problem >;)", False, (255, 000, 000)))
+        #    yield
 
         while True:
-            print("well done")
             yield
 
     def update(self, bullets):

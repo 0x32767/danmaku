@@ -28,7 +28,7 @@ class Player(pg.sprite.Sprite):
             80, 80
         )
 
-        self.lives = 2
+        self.lives = 10
 
     def send_keyup(self, key):
         if key == K_UP:
@@ -130,6 +130,9 @@ class Player(pg.sprite.Sprite):
         self.lives -= 1
 
         if self.lives < 0:
+            print(self.lives)
+            self.lives = "You ran out!"
+
             pg.event.post(pg.event.Event(EVENT_GAME_OVER))
             return
 
@@ -138,9 +141,11 @@ class Player(pg.sprite.Sprite):
         self.i_frames = 100
 
     def reset(self):
+        self.lives = 0
+
         self.i_frames = 0
 
         self.x = (PF_START_X + PF_END_X) // 2
         self.y = PF_END_Y - 20
 
-        self.lives = 2
+        self.lives = 10

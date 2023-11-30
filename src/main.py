@@ -5,8 +5,8 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 from pygame.locals import *
 import pygame as pg
 
+from stages.stage_ex import StageManagerEX
 from effectmanager import EffectManager
-from stagemanager import StageManager
 from player import Player
 from var import *
 
@@ -23,7 +23,7 @@ bullets = pg.sprite.Group()
 player = pg.sprite.GroupSingle(Player())
 font = pg.font.Font("LePatinMagicien-XB7d.ttf", 20)
 effects = EffectManager()
-stg_man = StageManager()
+stg_man = StageManagerEX()
 
 stg_man.player = player
 stg_man.font = font
