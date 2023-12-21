@@ -8,6 +8,7 @@ import pygame as pg
 from stages.stage_ex import StageManagerEX
 from effectmanager import EffectManager
 from player import Player
+from enemy import Enemy
 from var import *
 
 pg.init()
@@ -22,6 +23,7 @@ running = True
 bullets = pg.sprite.Group()
 player = pg.sprite.GroupSingle(Player())
 font = pg.font.Font("LePatinMagicien-XB7d.ttf", 20)
+enemy = Enemy()
 effects = EffectManager()
 stg_man = StageManagerEX()
 
@@ -72,6 +74,15 @@ while running:
 
         if event.type == EVENT_BULLET_DIE:
             effects.add_particle(event.dict["x"], event.dict["y"])
+        
+        if event.type == EVENT_ENEMY_POSITION:
+            enemy.set_pos(event.dict["x"], event.dict["y"])
+        
+        if event.type == EVENT_SHOW_ENEMY:
+            enemy.set_active()
+        
+        if event.type == EVENT_HIDE_ENEMY:
+            enemy.set_inactive()
 
     window.fill((000, 000, 000))
 
@@ -109,6 +120,8 @@ while running:
 
     text = font.render(f"Lives: {player.sprite.lives}", False, (255, 255, 255))
     window.blit(text, (PF_END_X + 25, PF_START_Y))
+
+    enemy.render(window)
 
     pg.display.flip()
 

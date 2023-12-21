@@ -14,12 +14,13 @@ class Bullet(pg.sprite.Sprite):
         ir: tuple[int, int, int] = (255, 255, 255),
         cr: tuple[int, int, int] = (000, 000, 000),
         lr: tuple[int, int, int] = (000, 255, 000),
+        radius: int = 4,
     ) -> None:
         super().__init__()
 
         self.direction = direction
         self.speed = speed / 100
-        self.radius = 4
+        self.radius = radius
         self.x = x
         self.y = y
 

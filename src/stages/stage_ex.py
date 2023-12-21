@@ -24,6 +24,9 @@ class StageManagerEX:
 
         yield from self.wait(100)
 
+        pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": (PF_START_X + PF_END_X) // 2, "y": (PF_START_Y + PF_END_Y) // 2}))
+        pg.event.post(pg.event.Event(EVENT_SHOW_ENEMY))
+
         # 3 basic rings with a bit of randomness
         for _ in range(3):
             for angle in range(0, 360, 20):
@@ -69,8 +72,11 @@ class StageManagerEX:
 
         yield from self.wait(50)
 
+        bullets.add(Bullet(PF_MID_X, PF_MID_Y, 0, 0, radius=10))
         # some basic streaming
         for xx in range(PF_START_X, PF_END_Y // 2):
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": xx, "y": PF_START_Y + 25}))
+
             player_angle = -degrees(
                 atan(
                     radians(
@@ -100,10 +106,13 @@ class StageManagerEX:
             )
 
         yield from self.wait(50)
+        bullets.clear()
 
         # spinning ring
         offset = 100
-        for _ in range(5):
+        for _ in range(3):
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": PF_MID_X, "y": PF_MID_Y}))
+
             for _ in range(100):
                 # create a static circle
                 for angle in range(0, 360, 10):
@@ -137,6 +146,8 @@ class StageManagerEX:
                         yield from self.wait(20)
 
                         for x, y, heading in positions:
+                            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": x, "y": y}))
+
                             bullets.add(
                                 Bullet(
                                     x,
@@ -172,6 +183,11 @@ class StageManagerEX:
 
                 bullets.empty()
 
+        for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": xx, "y": PF_START_Y + 10}))
+            pg.event.post(pg.event.Event(EVENT_SHOW_ENEMY))
+            yield from self.wait(15)
+
         # a checkerboard of bullets
         for _ in range(10):
             # X
@@ -185,7 +201,9 @@ class StageManagerEX:
             yield from self.wait(75)
 
         # a row of streaming
-        for xx in range(PF_START_X, PF_END_X, 5):
+        for idx, xx in enumerate(range(PF_START_X, PF_END_X, 10)):
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": xx, "y": PF_START_Y + 25}))
+
             direction = -degrees(
                 atan(
                     radians(
@@ -195,6 +213,16 @@ class StageManagerEX:
                 )
             )
             bullets.add(Bullet(xx, PF_START_Y, direction, 2, lr=(255, 255, 000)))
+
+            yield from self.wait(5)
+
+            if (idx % 15) == 0:
+                for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
+                    bullets.add(Bullet(xx + 15, PF_START_Y + 10, radians(0), 1))
+
+                # Y
+                for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 5):
+                    bullets.add(Bullet(PF_START_X + 10, yy + 15, radians(90), 1))
 
         # random bulets
         for _ in range(50):
@@ -224,6 +252,8 @@ class StageManagerEX:
         ####################################################################
 
         # 3 random circles of death
+        pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": PF_MID_X, "y": PF_MID_Y}))
+
         for _ in range(3):
             for _ in range(100):
                 bullets.add(
@@ -236,7 +266,7 @@ class StageManagerEX:
                     )
                 )
 
-            yield from self.wait(125)
+            yield from self.wait(225)
 
         # large round circle
         for angle in range(0, 360, 10):
