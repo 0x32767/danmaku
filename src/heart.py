@@ -13,7 +13,9 @@ class Heart(pg.sprite.Sprite):
         self.y = y
 
         self.image = pg.Surface((10, 13))
-        self.rect = pg.Rect(*pg.display.get_surface().get_rect().center, 0, 0).inflate(10, 13)
+        self.rect = pg.Rect(*pg.display.get_surface().get_rect().center, 0, 0).inflate(
+            10, 13
+        )
 
         pg.draw.rect(self.image, (255, 000, 255), ((0, 0), (10, 17)))
 

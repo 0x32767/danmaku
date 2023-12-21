@@ -5,11 +5,16 @@ from var import *
 
 
 class Bullet(pg.sprite.Sprite):
-    def __init__(self,
-                 x: int, y: int, direction: int, speed: int,
-                 ir: tuple[int, int, int] = (255, 255, 255),
-                 cr: tuple[int, int, int] = (000, 000, 000),
-                 lr: tuple[int, int, int]=(000, 255, 000)) -> None:
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        direction: int,
+        speed: int,
+        ir: tuple[int, int, int] = (255, 255, 255),
+        cr: tuple[int, int, int] = (000, 000, 000),
+        lr: tuple[int, int, int] = (000, 255, 000),
+    ) -> None:
         super().__init__()
 
         self.direction = direction
@@ -42,3 +47,7 @@ class Bullet(pg.sprite.Sprite):
             )
         ):
             self.kill()
+
+    def destroy(self):
+        pg.event.post(pg.event.Event(EVENT_BULLET_DIE, {"x": self.x, "y": self.y}))
+        self.kill()

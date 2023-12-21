@@ -116,7 +116,7 @@ class Player(pg.sprite.Sprite):
             if isinstance(collision, Heart):
                 self.lives += 1
                 collision.kill()
-            
+
             else:
                 self.die()
 
@@ -124,13 +124,15 @@ class Player(pg.sprite.Sprite):
             return True
 
     def die(self):
+        if isinstance(self.lives, str):
+            self.lives = 10
+
         self.x = (PF_START_X + PF_END_X) // 2
         self.y = PF_END_Y - 20
 
         self.lives -= 1
 
         if self.lives < 0:
-            print(self.lives)
             self.lives = "You ran out!"
 
             pg.event.post(pg.event.Event(EVENT_GAME_OVER))

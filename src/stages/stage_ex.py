@@ -80,7 +80,7 @@ class StageManagerEX:
                 )
             )
             bullets.add(Bullet(xx, PF_START_Y, player_angle, 5, lr=(000, 255, 255)))
-            yield from self.wait(5)
+            yield from self.wait(6)
 
             bullets.add(
                 Bullet(
@@ -101,64 +101,86 @@ class StageManagerEX:
 
         yield from self.wait(50)
 
-        # rings
+        # spinning ring
         offset = 100
         for _ in range(5):
             for _ in range(100):
                 # create a static circle
                 for angle in range(0, 360, 10):
-                    bullets.add(Bullet(
-                        PF_MID_X+(2*degrees(cos(radians(angle+offset)))),
-                        PF_MID_Y+(2*degrees(sin(radians(angle+offset)))),
-                    angle, 0))
-                
+                    bullets.add(
+                        Bullet(
+                            PF_MID_X + (2 * degrees(cos(radians(angle + offset)))),
+                            PF_MID_Y + (2 * degrees(sin(radians(angle + offset)))),
+                            angle,
+                            0,
+                        )
+                    )
+
                 offset -= uniform(1, 2)
-    
+
                 if offset < 2:
                     offset = 100
-                
+
                 else:
                     if offset > 25:
                         yield from self.wait(1)
-    
+
                     elif offset > 10:
                         yield from self.wait(2)
-    
+
                     else:
                         positions = []
                         # shoot bullets out
                         for bullet in bullets.sprites():
                             positions.append((bullet.x, bullet.y, bullet.direction))
 
-                        yield from self.wait(10)
-
-                        for (x, y, heading) in positions:
-                            bullets.add(
-                                Bullet(x, y, heading, speed=0, ir=(255, 000, 000), lr=(255, 255, 255)),
-                                Bullet(x+uniform(-2, 2), y+uniform(-2, 2), heading, speed=0, ir=(255, 000, 000), lr=(255, 255, 255))
-                            )
-
                         yield from self.wait(20)
 
-                        for bullet in bullets.sprites():
-                            bullet.speed = 0.05+uniform(0, 0.1)
+                        for x, y, heading in positions:
+                            bullets.add(
+                                Bullet(
+                                    x,
+                                    y,
+                                    heading,
+                                    speed=0,
+                                    ir=(255, 000, 000),
+                                    lr=(255, 255, 255),
+                                ),
+                                Bullet(
+                                    x,
+                                    y,
+                                    heading + uniform(-10, 10),
+                                    speed=0,
+                                    ir=(255, 000, 000),
+                                    lr=(255, 255, 255),
+                                ),
+                            )
 
-                        while bullets:
-                            yield
+                            yield from self.wait(2)
+
+                        for bullet in bullets.sprites():
+                            bullet.speed = 0.01 + uniform(0.01, 0.05)
+                            bullet.direction = bullet.direction + uniform(-10, 10)
+
+                        yield from self.wait(50)
+
+                        bullets.add(*[Bullet(PF_MID_X, PF_MID_Y, radians(randint(0, 360)), speed=2.5, lr=(000, 000, 255)) for _ in range(100)])
+
+                        yield from self.wait(150)
 
                         offset = 100
-    
+
                 bullets.empty()
 
         # a checkerboard of bullets
         for _ in range(10):
             # X
             for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
-                bullets.add(Bullet(xx, PF_START_Y + 10, radians(0), 1))
+                bullets.add(Bullet(xx + 15, PF_START_Y + 10, radians(0), 1))
 
             # Y
             for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 5):
-                bullets.add(Bullet(PF_START_X + 10, yy, radians(90), 1))
+                bullets.add(Bullet(PF_START_X + 10, yy + 15, radians(90), 1))
 
             yield from self.wait(75)
 
@@ -270,7 +292,7 @@ class StageManagerEX:
         yield from self.wait(500)
         bullet_x = (PF_END_X + PF_START_X) / 2
         bullet_y = (PF_END_Y + PF_START_Y) / 2
-        for _ in range(100):
+        for i in range(100):
             bullet_x += randint(-20, 20)
             bullet_y += randint(-20, 20)
 
@@ -286,14 +308,43 @@ class StageManagerEX:
 
             yield from self.wait(15)
 
+            if (i % 10) == 0:
+                for angle in range(0, 360, 20):
+                    bullets.add(
+                        Bullet(
+                            bullet_x,
+                            bullet_y,
+                            direction=radians(angle),
+                            speed=2,
+                            ir=(000, 000, 000),
+                            lr=(255, 255, 255),
+                        )
+                    )
+
         yield from self.wait(35)
 
         # death rings
-        for color in ((255, 000, 000), (000, 255, 000), (255, 255, 000), (000, 000, 255), (255, 000, 255), (000, 255, 255), (255, 255, 255)):
+        for color in (
+            (255, 000, 000),
+            (000, 255, 000),
+            (255, 255, 000),
+            (000, 000, 255),
+            (255, 000, 255),
+            (000, 255, 255),
+            (255, 255, 255),
+        ):
             for angle in range(0, 360, 10):
                 for _ in range(randint(3, 5)):
-                    bullets.add(Bullet(PF_MID_X, PF_START_Y*1.2, uniform(angle-10, angle+10), uniform(5, 5.5), lr=color))
-            
+                    bullets.add(
+                        Bullet(
+                            PF_MID_X,
+                            PF_START_Y * 1.2,
+                            uniform(angle - 10, angle + 10),
+                            uniform(5, 5.5),
+                            lr=color,
+                        )
+                    )
+
             yield from self.wait(25)
 
         # aimed massive random blodge
@@ -306,17 +357,25 @@ class StageManagerEX:
                     )
                 )
             )
-            bullets.add(Bullet(xx, PF_START_Y, direction+uniform(-1, 1),uniform(2, 4), lr=(255, 255, 000)))
+            bullets.add(
+                Bullet(
+                    xx,
+                    PF_START_Y,
+                    direction + uniform(-1, 1),
+                    uniform(2, 4),
+                    lr=(255, 255, 000),
+                )
+            )
 
         # drop a life
         bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
         # troll the player
-        #for _ in range(100):
+        # for _ in range(100):
         #    pg.display.get_surface().blit(self.font.render("You Win!", False, (255, 000, 000)))
         #    yield
 
-        #for _ in range(100):
+        # for _ in range(100):
         #    pg.display.get_surface().blit(self.font.render("LOL! Problem >;)", False, (255, 000, 000)))
         #    yield
 

@@ -47,14 +47,21 @@ while running:
         if event.type == KEYDOWN and game_over:
             if event.dict["key"] == K_z:
                 game_over = False
-                
+
                 player.sprite.reset()
                 bullets.empty()
                 stg_man.reset()
 
         if event.type == EVENT_PLAYER_IFRAME:
             for _ in range(3):
-                effects.add_particle(player.sprite.x, player.sprite.y, min_speed=0.01,  max_speed=0.011,  min_frames=20, max_frames=50)
+                effects.add_particle(
+                    player.sprite.x,
+                    player.sprite.y,
+                    min_speed=0.01,
+                    max_speed=0.011,
+                    min_frames=20,
+                    max_frames=50,
+                )
 
         if event.type == EVENT_PLAYER_HIT:
             for _ in range(10):
@@ -62,6 +69,9 @@ while running:
 
         if event.type == EVENT_GAME_OVER:
             game_over = True
+
+        if event.type == EVENT_BULLET_DIE:
+            effects.add_particle(event.dict["x"], event.dict["y"])
 
     window.fill((000, 000, 000))
 
@@ -98,7 +108,7 @@ while running:
         player.sprite.register_collision(collisions)
 
     text = font.render(f"Lives: {player.sprite.lives}", False, (255, 255, 255))
-    window.blit(text, (PF_END_X+25, PF_START_Y))
+    window.blit(text, (PF_END_X + 25, PF_START_Y))
 
     pg.display.flip()
 
