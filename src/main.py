@@ -84,6 +84,17 @@ while running:
         if event.type == EVENT_HIDE_ENEMY:
             enemy.set_inactive()
 
+        if event.type == EVENT_MAKE_PARTICLE:
+            for _ in range(3):
+                effects.add_particle(
+                    event.dict["x"],
+                    event.dict["y"],
+                    min_speed=0.01,
+                    max_speed=0.011,
+                    min_frames=20,
+                    max_frames=50,
+                )
+
     window.fill((000, 000, 000))
 
     if game_over:

@@ -24,8 +24,8 @@ class StageManagerEX:
 
         yield from self.wait(100)
 
-        pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": (PF_START_X + PF_END_X) // 2, "y": (PF_START_Y + PF_END_Y) // 2}))
         pg.event.post(pg.event.Event(EVENT_SHOW_ENEMY))
+        pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": (PF_START_X + PF_END_X) // 2, "y": (PF_START_Y + PF_END_Y) // 2}))
 
         # 3 basic rings with a bit of randomness
         for _ in range(3):
@@ -106,7 +106,9 @@ class StageManagerEX:
             )
 
         yield from self.wait(50)
-        bullets.clear()
+        bullets.empty()
+
+        bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
         # spinning ring
         offset = 100
@@ -216,7 +218,9 @@ class StageManagerEX:
 
             yield from self.wait(5)
 
+            # continue the checkerboard of bullets
             if (idx % 15) == 0:
+                # X
                 for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
                     bullets.add(Bullet(xx + 15, PF_START_Y + 10, radians(0), 1))
 
@@ -240,11 +244,11 @@ class StageManagerEX:
         for _ in range(5):
             # X
             for xx in range(PF_START_X, PF_END_X, (PF_START_X + PF_END_X) // 5):
-                bullets.add(Bullet(xx, PF_START_Y + 10, radians(0), 1))
+                bullets.add(Bullet(xx + 15, PF_START_Y + 10, radians(0), 1))
 
             # Y
             for yy in range(PF_START_Y, PF_END_Y, (PF_START_Y + PF_END_Y) // 5):
-                bullets.add(Bullet(PF_START_X + 10, yy, radians(90), 1))
+                bullets.add(Bullet(PF_START_X + 10, yy + 15, radians(90), 1))
 
             yield from self.wait(75)
 
@@ -296,13 +300,17 @@ class StageManagerEX:
 
         # random circles
         orientation = (
-            (PF_END_X, PF_START_Y),
-            (PF_END_X, PF_END_Y),
-            (PF_START_X, PF_START_Y),
-            (PF_START_X, PF_END_Y),
+            (PF_END_X - 10, PF_START_Y + 10),
+            (PF_END_X - 10, PF_END_Y - 10),
+            (PF_START_X + 10, PF_START_Y + 10),
+            (PF_START_X + 10, PF_END_Y - 10),
         )
         for speed_up in range(10):
+            
             pos = choice(orientation)
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": pos[0], "y": pos[1]}))
+
+            yield from self.wait(randint(10, 60))
 
             for angle in range(0, 360, 5):
                 bullets.add(
@@ -316,7 +324,9 @@ class StageManagerEX:
                     )
                 )
 
-            yield from self.wait(randint(10, 80))
+            yield from self.wait(randint(10, 20))
+
+        bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
         # tail
         yield from self.wait(500)
@@ -325,6 +335,8 @@ class StageManagerEX:
         for i in range(100):
             bullet_x += randint(-20, 20)
             bullet_y += randint(-20, 20)
+
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": bullet_x, "y": bullet_y}))
 
             for angle in range(0, 360, 25):
                 bullets.add(
@@ -375,39 +387,52 @@ class StageManagerEX:
                         )
                     )
 
-            yield from self.wait(25)
+            yield from self.wait(75)
 
-        # aimed massive random blodge
-        for _ in range(128):
-            direction = -degrees(
-                atan(
-                    radians(
-                        (self.player.sprite.x - xx)
-                        / (PF_START_X - self.player.sprite.y)
-                    )
-                )
-            )
-            bullets.add(
-                Bullet(
-                    xx,
-                    PF_START_Y,
-                    direction + uniform(-1, 1),
-                    uniform(2, 4),
-                    lr=(255, 255, 000),
-                )
-            )
+        yield from self.wait(150)
 
         # drop a life
         bullets.add(Heart((PF_START_X + PF_END_X) // 2, PF_START_Y + 10, 25))
 
-        # troll the player
-        # for _ in range(100):
-        #    pg.display.get_surface().blit(self.font.render("You Win!", False, (255, 000, 000)))
-        #    yield
+        for _ in range(20):
+            plant_x = self.player.sprite.x
+            plant_y = self.player.sprite.y
+            pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": plant_x, "y": plant_y}))
+            yield from self.wait(50)
+            pg.event.post(pg.event.Event(EVENT_MAKE_PARTICLE, {"x": plant_x, "y": plant_y}))
+            yield from self.wait(20)
+            bullets.add(Bullet(
+                x=plant_x,
+                y=plant_y,
+                speed=0,
+                direction=0,
+                radius=25,
+                ir=(255, 000, 000),
+                cr=(000, 000, 000),
+                lr=(255, 000, 000)
+            ))
 
-        # for _ in range(100):
-        #    pg.display.get_surface().blit(self.font.render("LOL! Problem >;)", False, (255, 000, 000)))
-        #    yield
+            for _ in range(20):
+                bullets.add(Bullet(
+                    x=plant_x,
+                    y=plant_y,
+                    direction=radians(randint(0, 360)),
+                    speed=uniform(1, 2)
+                ))
+
+            yield from self.wait(55)
+
+        yield from self.wait(45)
+
+        pg.event.post(pg.event.Event(EVENT_ENEMY_POSITION, {"x": (PF_START_X + PF_END_X) // 2, "y": (PF_START_Y + PF_END_Y) // 2}))
+        for offset in range(360):
+            for angle in range(360):
+                if (angle % 72):
+                    continue
+
+                bullets.add(Bullet(PF_MID_X, PF_MID_Y, direction=radians(angle+offset), speed=10))
+
+            yield from self.wait(5)
 
         while True:
             yield
